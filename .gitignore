@@ -1,0 +1,17 @@
+# Node.js (back-end et front-end)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+build/
+
+# React (build folder)
+/build
+
+# Python (IA)
+venv/
+__pycache__/
+*.pyc
+
+# Environnement général
+.DS_Store
