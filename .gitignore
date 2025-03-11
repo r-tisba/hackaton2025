@@ -15,3 +15,6 @@ __pycache__/
 
 # Environnement général
 .DS_Store
+
+# DataSet
+archive/
