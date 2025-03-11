@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        video {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="startButton">Commencer</button>
+    <div id="result"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startButton = document.getElementById('startButton');
+        const resultDiv = document.getElementById('result');
+
+        // Demander l'accès à la caméra
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Erreur d\'accès à la caméra:', err);
+            });
+
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true; // Désactiver le bouton
+            resultDiv.innerText = 'Traitement en cours...';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('image', blob, 'frame.png');
+
+                try {
+                    const response = await fetch('http://localhost:5000/api/model/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    console.log('API response status:', response.status);
+                    console.log('API response:', response);
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la requête');
+                    }
+
+                    const data = await response.json();
+                    console.log('API response data:', data);
+                    resultDiv.innerText = `: ${data.result}`;
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    resultDiv.innerText = 'Erreur lors de la détection de l\'émotion.';
+                } finally {
+                    startButton.disabled = false; // Réactiver le bouton
+                }
+            }, 'image/png');
+        });
+    </script>
+</body>
+</html>
