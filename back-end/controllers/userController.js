@@ -1,7 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-
+// Générer UNE seule fois la clé secrète
+const SECRET_KEY = crypto.randomBytes(32).toString('hex');
 exports.registerUser = async (req, res) => {
     const { pseudo, mail, pwd } = req.body;
     try {
@@ -14,6 +16,8 @@ exports.registerUser = async (req, res) => {
     }
 };
 
+module.exports.SECRET_KEY = SECRET_KEY;
+
 exports.loginUser = async (req, res) => {
     const { mail, pwd } = req.body;
     try {
@@ -23,7 +27,7 @@ exports.loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(pwd, user.pwd);
         if (!isMatch) return res.status(400).json({ message: 'Mot de passe incorrect' });
 
-        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id },SECRET_KEY, { expiresIn: '1h' });
         res.json({ token, user });
     } catch (error) {
         res.status(500).json({ message: error.message });
