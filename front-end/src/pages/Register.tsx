@@ -22,16 +22,13 @@ export function Register() {
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Conversion des centres d'intérêt en émotions
     const selectedEmotions = interests.map(interest => interestEmotionMap[interest]);
 
-    // Stocke les infos en localStorage (remplacer par une API plus tard)
     localStorage.setItem("loggedIn", "true");
     localStorage.setItem("username", username);
     localStorage.setItem("interests", JSON.stringify(interests));
     localStorage.setItem("emotions", JSON.stringify(selectedEmotions));
 
-    // Redirige vers la page d'accueil après inscription
     navigate("/home");
   };
 
@@ -62,7 +59,7 @@ export function Register() {
             />
           </div>
 
-          {/* SECTION CHOIX DES INTÉRÊTS */}
+          {}
           <div className="mb-4">
             <label className="block text-sm font-medium">Quels contenus souhaitez-vous voir ?</label>
             <div className="flex flex-wrap gap-2 mt-2">
