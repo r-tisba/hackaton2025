@@ -64,3 +64,13 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
+#save the model in pickle file
+import pickle
+
+with open('model.pkl', 'wb') as f:
+    pickle.dump(model, f)
+
+# Sauvegarder le processor
+with open('processor.pkl', 'wb') as f:
+    pickle.dump(processor, f)
+
