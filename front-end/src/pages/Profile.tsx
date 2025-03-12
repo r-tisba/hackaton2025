@@ -1,21 +1,26 @@
 import React from 'react';
 import { Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { TweetCard } from '@/components/tweet/TweetCard';
-import { mockTweets, mockUsers } from '@/data/mockData';
+import { mockUsers } from '@/data/mockData';
 
 export function Profile() {
   const currentUser = mockUsers[0];
-  const userTweets = mockTweets.filter((tweet) => tweet.author.id === currentUser.id);
+  const location = useLocation();
+
+  // Définition des onglets avec leurs liens
+  const tabs = [
+    { name: "Tweets", path: "tweets" },
+    { name: "Replies", path: "replies" },
+    { name: "Media", path: "media" },
+    { name: "Likes", path: "likes" }
+  ];
 
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-bold">{currentUser.name}</h1>
-          <span className="text-sm text-gray-500">
-            {userTweets.length} Tweets
-          </span>
         </div>
       </header>
 
@@ -42,7 +47,6 @@ export function Profile() {
         <div className="mt-4">
           <h2 className="text-xl font-bold">{currentUser.name}</h2>
           <p className="text-gray-500">@{currentUser.username}</p>
-          
           <p className="mt-4">{currentUser.bio}</p>
 
           <div className="mt-4 flex flex-wrap gap-4 text-gray-500">
@@ -52,9 +56,7 @@ export function Profile() {
             </div>
             <div className="flex items-center">
               <LinkIcon className="mr-1 h-4 w-4" />
-              <a href="#" className="text-blue-500">
-                example.com
-              </a>
+              <a href="#" className="text-blue-500">example.com</a>
             </div>
             <div className="flex items-center">
               <Calendar className="mr-1 h-4 w-4" />
@@ -75,33 +77,27 @@ export function Profile() {
         </div>
       </div>
 
+      {/* NAVIGATION ENTRE LES SECTIONS */}
       <div className="border-t border-gray-200">
         <nav className="flex border-b border-gray-200">
-          <button className="flex-1 border-b-2 border-blue-500 py-4 text-blue-500">
-            Tweets
-          </button>
-          <button className="flex-1 py-4 text-gray-500 hover:bg-gray-50">
-            Replies
-          </button>
-          <button className="flex-1 py-4 text-gray-500 hover:bg-gray-50">
-            Media
-          </button>
-          <button className="flex-1 py-4 text-gray-500 hover:bg-gray-50">
-            Likes
-          </button>
+          {tabs.map((tab) => (
+            <Link
+              key={tab.name}
+              to={`/profile/${tab.path}`}
+              className={`flex-1 py-4 text-center ${
+                location.pathname === `/profile/${tab.path}` 
+                  ? "border-b-2 border-blue-500 text-blue-500" 
+                  : "text-gray-500 hover:bg-gray-50"
+              }`}
+            >
+              {tab.name}
+            </Link>
+          ))}
         </nav>
 
-        <div className="divide-y divide-gray-200">
-          {userTweets.map((tweet) => (
-            <TweetCard
-              key={tweet.id}
-              tweet={tweet}
-              onLike={() => {}}
-              onRetweet={() => {}}
-              onReply={() => {}}
-              onBookmark={() => {}}
-            />
-          ))}
+        {/* Contenu dynamique des onglets */}
+        <div className="divide-y divide-gray-200 p-4">
+          <Outlet />
         </div>
       </div>
     </>

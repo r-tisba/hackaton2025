@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   username: string;
   name: string;
   bio: string;
@@ -9,9 +9,8 @@ export interface User {
   following: number;
   joined: string;
 }
-
 export interface Tweet {
-  id: string;
+  id: number;
   content: string;
   images?: string[];
   createdAt: string;
@@ -19,15 +18,16 @@ export interface Tweet {
   likes: number;
   retweets: number;
   replies: number;
-  isLiked: boolean;
-  isRetweeted: boolean;
-  isBookmarked: boolean;
-  hashtags: string[];
-  mentions: string[];
+  isLiked: boolean; 
+  isRetweeted: boolean;  
+  isBookmarked: boolean;  
+  hashtags: string[];  
+  mentions: string[]; 
 }
 
+
 export interface Notification {
-  id: string;
+  id: number;
   type: 'like' | 'retweet' | 'reply' | 'follow' | 'mention';
   user: User;
   tweet?: Tweet;
