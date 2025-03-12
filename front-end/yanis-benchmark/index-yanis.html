@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #countdown {
+            font-size: 2em;
+            margin-top: 20px;
+        }
+        #waiting {
+            font-size: 1.5em;
+            margin-top: 20px;
+            display: none;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .photo-result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+        }
+        .photo-result img {
+            max-width: 100px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="startButton">Commencer</button>
+    <div id="countdown"></div>
+    <div id="waiting">Waiting...</div>
+    <div id="results"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startButton = document.getElementById('startButton');
+        const countdownDiv = document.getElementById('countdown');
+        const waitingDiv = document.getElementById('waiting');
+        const resultsDiv = document.getElementById('results');
+
+        // Demander l'accès à la caméra
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Erreur d\'accès à la caméra:', err);
+            });
+
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true; // Désactiver le bouton
+            resultsDiv.innerHTML = ''; // Clear previous results
+            countdownDiv.innerText = ''; // Clear previous countdown
+            waitingDiv.style.display = 'none'; // Hide waiting message
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+
+            const photos = [];
+            for (let i = 0; i < 5; i++) {
+                for (let j = 3; j > 0; j--) {
+                    countdownDiv.innerText = `Photo in ${j}...`;
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+                }
+                countdownDiv.innerText = 'Taking photo...';
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                photos.push(blob);
+                countdownDiv.innerText = ''; // Clear countdown
+            }
+
+            waitingDiv.style.display = 'block'; // Show waiting message
+
+            const results = await Promise.all(photos.map(async (photo, index) => {
+                const formData = new FormData();
+                formData.append('image', photo, `frame${index}.png`);
+
+                try {
+                    const response = await fetch('http://localhost:5000/api/model/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la requête');
+                    }
+
+                    const data = await response.json();
+                    return { photo, result: data.result };
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    return { photo, result: 'Erreur lors de la détection de l\'émotion.' };
+                }
+            }));
+
+            waitingDiv.style.display = 'none'; // Hide waiting message
+
+            results.forEach(({ photo, result }) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const photoResultDiv = document.createElement('div');
+                    photoResultDiv.classList.add('photo-result');
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    const resultText = document.createElement('p');
+                    resultText.innerText = result;
+                    photoResultDiv.appendChild(img);
+                    photoResultDiv.appendChild(resultText);
+                    resultsDiv.appendChild(photoResultDiv);
+                };
+                reader.readAsDataURL(photo);
+            });
+
+            startButton.disabled = false; // Réactiver le bouton
+        });
+    </script>
+</body>
+</html>
