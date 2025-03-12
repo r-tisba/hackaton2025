@@ -3,6 +3,7 @@ const Tweet = require('../models/Tweet');
 exports.createTweet = async (req, res) => {
     const { contenue, attachment } = req.body;
     try {
+        console.log(req.user);
         const newTweet = new Tweet({ id_user: req.user.id, contenue, attachment });
         await newTweet.save();
         res.status(201).json(newTweet);

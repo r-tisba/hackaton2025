@@ -4,34 +4,36 @@ import type { Tweet } from '@/types';
 
 interface TweetCardProps {
   tweet: Tweet;
-  onLike: (id: string) => void;
-  onRetweet: (id: string) => void;
-  onReply: (id: string) => void;
-  onBookmark: (id: string) => void;
+  onLike: (id: Number) => void;
+  onRetweet: (id: Number) => void;
+  onReply: (id: Number) => void;
+  onBookmark: (id: Number) => void;
+  id_user: Number;
 }
 
 export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: TweetCardProps) {
+  console.log(tweet);
   return (
     <article className="border-b border-gray-200 p-4 hover:bg-gray-50">
       <div className="flex space-x-3">
         <img
-          src={tweet.author.profileImage}
-          alt={tweet.author.name}
+          src={tweet.id_user?.pseudo ?? "https://picsum.photos/199"}
+          alt={tweet.id_user?.pseudo ?? ""}
           className="h-12 w-12 rounded-full"
         />
         <div className="flex-1 space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="font-bold">{tweet.author.name}</span>
-            <span className="text-gray-500">@{tweet.author.username}</span>
+            <span className="font-bold">{tweet.id_user?.pseudo}</span>
+            <span className="text-gray-500">@{tweet.id_user?.pseudo}</span>
             <span className="text-gray-500">·</span>
             <time className="text-gray-500">
               {formatDistanceToNow(new Date(tweet.createdAt))}
             </time>
           </div>
           
-          <p className="text-gray-900">{tweet.content}</p>
+          <p className="text-gray-900">{tweet.contenue}</p>
           
-          {tweet.images && tweet.images.length > 0 && (
+          {tweet.images && (
             <div className="mt-3 grid gap-2">
               {tweet.images.map((image, index) => (
                 <img
@@ -44,7 +46,7 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: Twe
             </div>
           )}
           
-          {tweet.hashtags.length > 0 && (
+          {tweet.hashtags && (
             <div className="flex flex-wrap gap-2">
               {tweet.hashtags.map((tag) => (
                 <span key={tag} className="text-blue-500">

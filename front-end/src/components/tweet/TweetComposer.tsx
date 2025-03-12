@@ -1,26 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image, Smile } from 'lucide-react';
 import { Button } from '../ui/Button';
+import axios from 'axios';
 
 export function TweetComposer() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [user, setUser] = useState<any>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const { _id: id } = user;  // Extraire l'id de l'utilisateur
+
+      try {
+        const response = await axios.get(`http://localhost:5000/api/users/profile/${id}`, {
+          headers: {
+          'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des informations utilisateur:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle tweet submission
-    setContent('');
-    setImages([]);
+    
+    try {
+      const tweetData = {
+        contenue: content,
+        attachment: null,  // Assurez-vous que 'images' contient les URL des images ou leur représentation
+      };
+  
+      // Envoi de la requête POST pour créer un tweet
+      await axios.post('http://localhost:5000/api/tweets/create', tweetData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+  
+      // Réinitialisation après envoi
+      setContent('');
+      setImages([]);
+    } catch (error) {
+      console.error('Error creating tweet:', error);
+    }
   };
 
   return (
     <div className="border-b border-gray-200 p-4">
       <div className="flex space-x-4">
-        <img
-          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-          alt="Profile"
-          className="h-12 w-12 rounded-full"
-        />
+        {user && (
+          <img
+            src={user.profileImage}
+            alt={user.name}
+            className="h-12 w-12 rounded-full"
+          />
+        )}
         <form onSubmit={handleSubmit} className="flex-1">
           <textarea
             value={content}

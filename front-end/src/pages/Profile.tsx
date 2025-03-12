@@ -1,14 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { mockUsers } from '../data/mockData';
+import axios from 'axios';
 
 export function Profile() {
-  const currentUser = mockUsers[0];
+  // Récupérer l'utilisateur depuis le localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  const { _id: id } = user;  // Extraire l'id de l'utilisateur
+  console.log(user);
+  
+  const [currentUser, setCurrentUser] = useState(null);
   const location = useLocation();
 
-  // Définition des onglets avec leurs liens
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(`http://localhost:5000/api/users/profile/${id}`,{
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("zrzetbzethztzet"+response.data);
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération du profil utilisateur:", error);
+      }
+    };
+
+    if (id) {
+      fetchUserProfile();
+    }
+  }, [id]);
+
+  if (!currentUser) {
+    return <div>Loading...</div>;
+  }
+
   const tabs = [
     { name: "Tweets", path: "tweets" },
     { name: "Replies", path: "replies" },
@@ -20,20 +48,20 @@ export function Profile() {
     <>
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
         <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-bold">{currentUser.name}</h1>
+          <h1 className="text-xl font-bold">{currentUser.pseudo}</h1>
         </div>
       </header>
 
       <div className="relative">
         <img
-          src={currentUser.bannerImage}
+          src={currentUser.banniere ? currentUser.banniere : "https://picsum.photos/800/600?random=1&blur=2"}
           alt="Profile banner"
           className="h-48 w-full object-cover"
         />
         <div className="absolute -bottom-16 left-4">
           <img
-            src={currentUser.profileImage}
-            alt={currentUser.name}
+            src={currentUser.photo ? currentUser.photo : "https://picsum.photos/199?random=2"}
+            alt={currentUser.pseudo}
             className="h-32 w-32 rounded-full border-4 border-white"
           />
         </div>
@@ -45,18 +73,18 @@ export function Profile() {
         </div>
 
         <div className="mt-4">
-          <h2 className="text-xl font-bold">{currentUser.name}</h2>
-          <p className="text-gray-500">@{currentUser.username}</p>
-          <p className="mt-4">{currentUser.bio}</p>
+          <h2 className="text-xl font-bold">{currentUser.pseudo}</h2>
+          <p className="text-gray-500">@{currentUser.pseudo}</p>
+          <p className="mt-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
 
           <div className="mt-4 flex flex-wrap gap-4 text-gray-500">
             <div className="flex items-center">
               <MapPin className="mr-1 h-4 w-4" />
-              San Francisco, CA
+              Saint-quentin-en-yvelines, France
             </div>
             <div className="flex items-center">
               <LinkIcon className="mr-1 h-4 w-4" />
-              <a href="#" className="text-blue-500">example.com</a>
+              <a href="https://ecole-ipssi.com/" target="_blank" className="text-blue-500">https://ecole-ipssi.com/</a>
             </div>
             <div className="flex items-center">
               <Calendar className="mr-1 h-4 w-4" />
@@ -83,9 +111,9 @@ export function Profile() {
           {tabs.map((tab) => (
             <Link
               key={tab.name}
-              to={`/profile/${tab.path}`}
+              to={`/profile/${id}/${tab.path}`}
               className={`flex-1 py-4 text-center ${
-                location.pathname === `/profile/${tab.path}` 
+                location.pathname === `/profile/${id}/${tab.path}` 
                   ? "border-b-2 border-blue-500 text-blue-500" 
                   : "text-gray-500 hover:bg-gray-50"
               }`}
