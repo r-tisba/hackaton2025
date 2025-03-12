@@ -5,10 +5,53 @@ const jwt = require('jsonwebtoken');
 // Générer UNE seule fois la clé secrète
 const SECRET_KEY = crypto.randomBytes(32).toString('hex');
 exports.registerUser = async (req, res) => {
-    const { pseudo, mail, pwd } = req.body;
+    const { pseudo, mail, pwd, interests } = req.body;
+
+    const interestToEmotionMap = {
+        "Humour": "happy",
+        "Frustation": "angry",
+        "Trise": "sad",
+        "Surprise": "surprise",
+        "Horreur": "fear",
+        "Dégoût": "disgust",
+        "Tout": "neutral"
+    };
+
     try {
         const hashedPassword = await bcrypt.hash(pwd, 10);
-        const newUser = new User({ pseudo, mail, pwd: hashedPassword });
+
+        // Initialiser les compteurs d'émotions
+        const emotionCounts = {
+            happy: 0,
+            angry: 0,
+            sad: 0,
+            surprise: 0,
+            fear: 0,
+            neutral: 0,
+            disgust: 0
+        };
+
+        // Incrémenter les compteurs des émotions pour chaque centre d'intérêt
+        interests.forEach(interest => {
+            const emotion = interestToEmotionMap[interest];
+            if (emotion) {
+            emotionCounts[emotion] += 1; // Incrémenter le compteur correspondant
+            }
+        });
+
+        const newUser = new User({
+            pseudo,
+            mail,
+            pwd: hashedPassword,
+            angry: emotionCounts.angry,
+            disgust: emotionCounts.disgust,
+            fear: emotionCounts.fear,
+            happy: emotionCounts.happy,
+            neutral: emotionCounts.neutral,
+            sad: emotionCounts.sad,
+            surprise: emotionCounts.surprise
+        });
+        
         await newUser.save();
         res.status(201).json({ message: 'Utilisateur créé avec succès' });
     } catch (error) {
