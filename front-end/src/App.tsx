@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
-import { RightSidebar } from './components/layout/RightSidebar';
 import { Home } from './pages/Home';
 import { Explore } from './pages/Explore';
 import { Notifications } from './pages/Notifications';
@@ -29,7 +28,7 @@ function App() {
           </Routes>
         </main>
         
-        <RightSidebar />
+        
       </div>
     </Router>
   );
