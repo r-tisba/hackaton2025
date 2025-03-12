@@ -3,7 +3,7 @@ const userSchema = new mongoose.Schema({
   pseudo: { type: String, required: true, unique: true },
   mail: { type: String, required: true, unique: true },
   pwd: { type: String, required: true },
-  photo: { type: String },
+  photo: { type: String, default: "https://picsum.photos/199" },
   banniere: { type: String },
   biographie: { type: String },
   angry: { type: Number, default: 0 },
