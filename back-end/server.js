@@ -7,8 +7,8 @@ const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const tweetRoutes = require('./routes/tweetRoutes');
 const interactionRoutes = require('./routes/interactionRoutes');
-const modelRoutes = require('./routes/modelRoutes'); // Ajouter cette ligne
-
+const modelRoutes = require('./routes/modelRoutes');
+const emotionRoutes = require('./routes/emotionRoutes'); 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -23,7 +23,8 @@ connectDB();
 app.use('/api/users', userRoutes);
 app.use('/api/tweets', tweetRoutes);
 app.use('/api/interactions', interactionRoutes);
-app.use('/api/model', modelRoutes); // Ajouter cette ligne
+app.use('/api/model', modelRoutes);
+app.use('/api/emotions', emotionRoutes);
 
 // Route par défaut
 app.get('/', (req, res) => {

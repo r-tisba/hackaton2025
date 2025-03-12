@@ -74,7 +74,7 @@
             const context = canvas.getContext('2d');
 
             const photos = [];
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 for (let j = 3; j > 0; j--) {
                     countdownDiv.innerText = `Photo in ${j}...`;
                     await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
@@ -88,9 +88,16 @@
 
             waitingDiv.style.display = 'block'; // Show waiting message
 
+
+            const tweetId = '67d001d8056886acab4bda05'; // Remplacez par l'ID du tweet
+            const userId = '67cffa679ca9764d3d6338c7'; // Remplacez par l'ID de l'utilisateur           
+            
             const results = await Promise.all(photos.map(async (photo, index) => {
                 const formData = new FormData();
                 formData.append('image', photo, `frame${index}.png`);
+                formData.append('tweetId', tweetId);
+                formData.append('userId', userId);
+
 
                 try {
                     const response = await fetch('http://localhost:5000/api/model/predict', {
