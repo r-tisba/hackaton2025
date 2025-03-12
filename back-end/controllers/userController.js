@@ -2,8 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-// Générer UNE seule fois la clé secrète
-const SECRET_KEY = crypto.randomBytes(32).toString('hex');
+
+const SECRET_KEY = process.env.SECRET_KEY;
 exports.registerUser = async (req, res) => {
     const { pseudo, mail, pwd, interests } = req.body;
 
@@ -86,3 +86,13 @@ exports.getUserProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-pwd');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}

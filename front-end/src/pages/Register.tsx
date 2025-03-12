@@ -1,6 +1,7 @@
+import axios from "axios";
 import React from 'react';
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Register() {
   const [username, setUsername] = useState("");
@@ -13,43 +14,50 @@ export function Register() {
   // Liste des centres d'intérêt avec images (Images en ligne fiables)
   const interestData: Record<string, { emotion: string; image: string }> = {
     "Humour": { emotion: "happy", image: "https://picsum.photos/150?random=1" },
-    "Sport": { emotion: "angry", image: "https://picsum.photos/150?random=2" },
-    "Art": { emotion: "sad", image: "https://picsum.photos/150?random=3" },
-    "Musique": { emotion: "surprise", image: "https://picsum.photos/150?random=4" },
-    "Actualités": { emotion: "fear", image: "https://picsum.photos/150?random=5" },
-    "Gaming": { emotion: "neutral", image: "https://picsum.photos/150?random=6" },
-    "Gastronomie": { emotion: "disgust", image: "https://picsum.photos/150?random=7" }
+    "Frustation": { emotion: "angry", image: "https://picsum.photos/150?random=2" },
+    "Trise": { emotion: "sad", image: "https://picsum.photos/150?random=3" },
+    "Surprise": { emotion: "surprise", image: "https://picsum.photos/150?random=4" },
+    "Horreur": { emotion: "fear", image: "https://picsum.photos/150?random=5" },
+    "Dégoût": { emotion: "disgust", image: "https://picsum.photos/150?random=7" },
+    "Tout": { emotion: "neutral", image: "https://picsum.photos/150?random=6" }
   };
 
   const availableInterests = Object.keys(interestData);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Vérification de l'adresse e-mail
+    setError(null); // Réinitialise les erreurs
+  
     if (!email.includes("@")) {
       setError("Veuillez entrer une adresse e-mail valide.");
       return;
     }
-
-    // Vérification du nombre de centres d'intérêt sélectionnés
+  
     if (interests.length < 2) {
       setError("Veuillez sélectionner au moins 2 types de contenu.");
       return;
     }
-
-    const selectedEmotions = interests.map(interest => interestData[interest].emotion);
-
-    // Sauvegarde des infos en localStorage (simule une inscription)
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("username", username);
-    localStorage.setItem("email", email);
-    localStorage.setItem("interests", JSON.stringify(interests));
-    localStorage.setItem("emotions", JSON.stringify(selectedEmotions));
-
-    navigate("/home");
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/users/register", {
+        pseudo: username,
+        mail: email,
+        pwd: password,
+        interests
+      });
+      
+      if (response.status === 201) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("loggedIn", "true");
+        navigate("/login");
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Une erreur est survenue.");
+    }
   };
-
+  
+  
   const toggleInterest = (interest: string) => {
     setInterests((prev) =>
       prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
@@ -131,6 +139,8 @@ export function Register() {
           <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded mt-4">
             S'inscrire
           </button>
+
+          <Link to="/login" className="block text-center mt-4 text-blue-500">Déjà inscrit ? Connectez-vous</Link>
 
         </form>
       </div>

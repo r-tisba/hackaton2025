@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 
 export const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    if (storedUser.email === email) {
+    try {
+      const response = await axios.post("http://localhost:5000/api/users/login", {
+        mail: email,
+        pwd: password
+      });
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("token", response.data.token);
       localStorage.setItem("loggedIn", "true");
-      navigate("/home"); 
-    } else {
-      alert("Email incorrect !");
+      navigate("/home");
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Une erreur est survenue.");
     }
   };
 

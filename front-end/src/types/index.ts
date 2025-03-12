@@ -10,6 +10,7 @@ export interface User {
   joined: string;
 }
 export interface Tweet {
+  id_user: any;
   id: number;
   content: string;
   images?: string[];
