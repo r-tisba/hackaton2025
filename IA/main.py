@@ -50,5 +50,5 @@ predicted_class_idx = logits.argmax(-1).item()
 predicted_label = id2label[predicted_class_idx]
 
 # Afficher le résultat
-print(f'Class: {predicted_label}')
+print(predicted_label)
 

@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const tweetSchema = new mongoose.Schema({
@@ -12,5 +11,6 @@ const tweetSchema = new mongoose.Schema({
     neutral: { type: Number, default: 0 },
     sad: { type: Number, default: 0 },
     surprise: { type: Number, default: 0 }
-  }, { timestamps: true });
-  module.exports = mongoose.model('Tweet', tweetSchema);
+}, { timestamps: true });
+
+module.exports = mongoose.model('Tweet', tweetSchema);
