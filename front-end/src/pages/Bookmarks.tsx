@@ -1,9 +1,67 @@
+import { useEffect, useState } from 'react';
 import { TweetCard } from '../components/tweet/TweetCard';
-import { mockTweets } from '../data/mockData';
+import axios from 'axios';
 import { Search } from 'lucide-react';
 
 export function Bookmarks() {
-  const bookmarkedTweets = mockTweets.filter((tweet) => tweet.isBookmarked);
+  const [bookmarkedTweets, setBookmarkedTweets] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [retweets, setRetweets] = useState([]);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/interactions/mysignets', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setBookmarkedTweets(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des signets:', error);
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/users");
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs:", error);
+      }
+    };
+
+    const fetchLikes = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/mylikes", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des likes:", error);
+      }
+    };
+
+    const fetchRetweets = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/myretweets", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des retweets:", error);
+      }
+    };
+
+    fetchUsers();
+    fetchLikes();
+    fetchRetweets();
+
+    if (user && token) {
+      fetchBookmarks();
+    }
+  }, [user, token]);
 
   return (
     <div className="flex justify-center">
@@ -17,7 +75,7 @@ export function Bookmarks() {
           <div className="divide-y divide-gray-200">
             {bookmarkedTweets.map((tweet) => (
               <TweetCard
-                key={tweet.id}
+                key={tweet._id}
                 tweet={tweet}
                 onLike={() => {}}
                 onRetweet={() => {}}
@@ -66,16 +124,13 @@ export function Bookmarks() {
           <div className="rounded-xl bg-gray-50 p-4">
             <h2 className="text-xl font-bold">Qui suivre</h2>
             <div className="mt-4 space-y-4">
-              {[
-                { name: "Jane Cooper", username: "@jane_cooper", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" },
-                { name: "Cody Fisher", username: "@cody_fisher", img: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" }
-              ].map((user, index) => (
+              {users.map((user, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <img src={user.img} alt={user.name} className="h-10 w-10 rounded-full" />
+                    <img src={user.photo} alt={user.pseudo} className="h-10 w-10 rounded-full" />
                     <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-500">{user.username}</p>
+                      <p className="font-medium">{user.pseudo}</p>
+                      <p className="text-sm text-gray-500">@{user.pseudo}</p>
                     </div>
                   </div>
                   <button className="inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-gray-300 bg-transparent hover:bg-gray-50 px-4 py-2 text-sm">
