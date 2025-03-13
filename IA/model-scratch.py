@@ -1,37 +1,32 @@
 import cv2
 import time
 import numpy as np
-import tensorflow as tf
+import torch
+from transformers import ViTForImageClassification, ViTImageProcessor
 import json
 import os
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# Charger le modèle entraîné
-model = tf.keras.models.load_model(os.path.join(current_dir, "scratch_d2_63_nb.h5"))
+# Load the Hugging Face model and image processor
+model_name = 'motheecreator/vit-Facial-Expression-Recognition'
+model = ViTForImageClassification.from_pretrained(model_name)
+processor = ViTImageProcessor.from_pretrained(model_name)
 
-# Définir manuellement le mapping des indices aux étiquettes
-emotion_labels = {
-    0: 'angry',
-    1: 'fear',
-    2: 'happy',
-    3: 'neutral',
-    4: 'sad',
-    5: 'surprise'
-}
+# Define the emotion labels
+emotion_labels = model.config.id2label
 
-# Charger le classifieur Haar pour la détection de visage
+# Load the Haar cascade for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Démarrer la capture vidéo depuis la webcam
+# Start video capture from the webcam
 video_capture = cv2.VideoCapture(0)
 
-# Chronomètre de 10 secondes
+# 10-second timer
 start_time = time.time()
-duration = 10  # secondes
+duration = 10  # seconds
 
 frame_count = 0
 
-# Dictionnaire pour compter les occurrences de chaque sentiment
+# Dictionary to count occurrences of each emotion
 emotion_counts = {label: 0 for label in emotion_labels.values()}
 
 while True:
@@ -42,7 +37,7 @@ while True:
     frame_count += 1
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Détection des visages
+    # Face detection
     faces = face_cascade.detectMultiScale(
         gray,
         scaleFactor=1.1,
@@ -52,40 +47,39 @@ while True:
     )
 
     for (x, y, w, h) in faces:
-        # Extraction de la région du visage
-        roi_gray = gray[y:y+h, x:x+w]
-        # Redimensionner à 64x64 pixels (adapter à la taille d'entrée du modèle)
-        roi_resized = cv2.resize(roi_gray, (64, 64))
-        # Normaliser les valeurs des pixels
-        roi_normalized = roi_resized.astype("float32") / 255.0
-        # Ajouter les dimensions nécessaires pour le modèle (batch et canal)
-        roi_input = np.expand_dims(roi_normalized, axis=0)
-        roi_input = np.expand_dims(roi_input, axis=-1)
+        # Extract the face region
+        roi_color = frame[y:y+h, x:x+w]
+        # Convert to RGB
+        roi_rgb = cv2.cvtColor(roi_color, cv2.COLOR_BGR2RGB)
+        # Resize and preprocess the image
+        inputs = processor(images=roi_rgb, return_tensors="pt")
 
-        # Prédiction de l'émotion
-        prediction = model.predict(roi_input)
-        emotion_idx = np.argmax(prediction)
-        label = emotion_labels[emotion_idx]
-        confidence = prediction[0][emotion_idx]
+        # Prediction
+        with torch.no_grad():
+            outputs = model(**inputs)
+        logits = outputs.logits
+        predicted_class_idx = logits.argmax(-1).item()
+        label = emotion_labels[predicted_class_idx]
+        confidence = torch.softmax(logits, -1)[0][predicted_class_idx].item()
 
-        # Imprimer le résultat pour chaque image
+        # Print the result for each image
         print(f"Image {frame_count}: {label} ({confidence * 100:.2f}%)")
 
-        # Compter l'occurrence du sentiment détecté
+        # Count the occurrence of the detected emotion
         emotion_counts[label] += 1
 
-    # Arrêt après 10 secondes
+    # Stop after 10 seconds
     if time.time() - start_time > duration:
-        print("Temps écoulé, arrêt du script.")
+        print("Time elapsed, stopping the script.")
         break
 
 video_capture.release()
 cv2.destroyAllWindows()
 
-# Calculer les 3 sentiments les plus détectés et leurs pourcentages
+# Calculate the top 3 detected emotions and their percentages
 total_detections = sum(emotion_counts.values())
 top_3_emotions = sorted(emotion_counts.items(), key=lambda x: x[1], reverse=True)[:3]
 top_3_emotions = {emotion: (count / total_detections) * 100 for emotion, count in top_3_emotions}
 
-# Afficher le résultat final
+# Display the final result
 print("RESULT:", json.dumps(top_3_emotions))

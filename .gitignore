@@ -4,3 +4,16 @@ node_modules/
 *.pkl
 IA/envirtuel/
 env_anas/
+.env/
+env/
+archive/
+archive2/
+archive3_preprocessed/
+archive2 2/
+archive2_preprocessed/
+archive2_preprocessed/
+train/
+train2/
+disgust/
+archive4_preprocessed/
+Archi/

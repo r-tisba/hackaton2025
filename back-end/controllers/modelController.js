@@ -41,7 +41,30 @@ exports.predictEmotion = (req, res) => {
 
             // Extraire et parser le JSON
             const jsonStr = resultLine.replace('RESULT:', '').trim();
-            const emotions = JSON.parse(jsonStr);
+            const rawEmotions = JSON.parse(jsonStr);
+
+            // Map Python's emotion names to database field names
+            const emotionMapping = {
+                "anger": "angry",
+                "happy": "happy",
+                "disgust": "disgust",
+                "fear": "fear",
+                "neutral": "neutral",
+                "sad": "sad",
+                "surprise": "surprise"
+            };
+
+            // Convert emotion names
+            const emotions = {};
+            for (const [emotion, value] of Object.entries(rawEmotions)) {
+                const mappedEmotion = emotionMapping[emotion];
+                if (mappedEmotion) {
+                    emotions[mappedEmotion] = value;
+                } else {
+                    console.warn(`Unknown emotion: ${emotion}`);
+                }
+            }
+
             console.log(`Emotions reçues: ${JSON.stringify(emotions)}`);
 
             // Appel l'API pour mettre à jour les émotions
