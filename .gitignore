@@ -16,6 +16,9 @@ train/
 train2/
 disgust/
 archive4_preprocessed/
+
+Archi/
+
 Archi/
 
 # RAPH - IA
@@ -24,3 +27,4 @@ data2/
 merged/
 validation/
 models/autres
+

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton">Commencer</button>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const userId = '67cffa679ca9764d3d6338c7'; // User ID à envoyer
+
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true; // Désactiver le bouton
+
+            try {
+                const response = await fetch('http://localhost:5000/api/model/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la requête');
+                }
+
+                const data = await response.json();
+                console.log('Résultats:', data);
+                alert(`Les 3 sentiments les plus détectés sont : ${JSON.stringify(data)}`);
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la détection de l\'émotion.');
+            } finally {
+                startButton.disabled = false; // Réactiver le bouton
+            }
+        });
+    </script>
+</body>
+</html>
