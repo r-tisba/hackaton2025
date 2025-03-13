@@ -9,18 +9,18 @@ const trends = [
   { tag: 'WebDev', tweets: '35K' },
 ];
 
-const suggestions = [
-  {
-    name: 'Jane Cooper',
-    username: 'jane_cooper',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  },
-  {
-    name: 'Cody Fisher',
-    username: 'cody_fisher',
-    image: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  },
-];
+const [suggestions, setSuggestions] = useState([]);
+
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/users");
+      setSuggestions(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs:", error);
+    }
+  };
+}, []);
 
 export function RightSidebar() {
   return (
@@ -53,22 +53,18 @@ export function RightSidebar() {
       <div className="mt-4 rounded-xl bg-gray-50 p-4">
         <h2 className="text-xl font-bold">Who to follow</h2>
         <div className="mt-4 space-y-4">
-          {suggestions.map((user) => (
-            <div key={user.username} className="flex items-center justify-between">
+          {suggestions.map((user, index) => (
+            <div key={index} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <img
-                  src={user.image}
-                  alt={user.name}
-                  className="h-10 w-10 rounded-full"
-                />
+                <img src={user.photo} alt={user.pseudo} className="h-10 w-10 rounded-full" />
                 <div>
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-gray-500">@{user.username}</p>
+                  <p className="font-medium">{user.pseudo}</p>
+                  <p className="text-sm text-gray-500">@{user.pseudo}</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                Follow
-              </Button>
+              <button className="inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-gray-300 bg-transparent hover:bg-gray-50 px-4 py-2 text-sm">
+                Suivre
+              </button>
             </div>
           ))}
         </div>
