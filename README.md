@@ -5,7 +5,7 @@ Ce projet est une application similaire à Twitter intégrant une analyse d'expr
 - **Front-end :** React.js
 - **Back-end :** Node.js/Express
 - **Base de données :** MongoDB Atlas
-- **Module IA :** Pytyhon avec un module CNN pour la reconnaissance d'expressions faciales
+- **Module IA :** Python avec un module CNN pour la reconnaissance d'expressions faciales
 
 ## Structure du projet
 - **back-end/** : Code source du serveur Node.js/Express
