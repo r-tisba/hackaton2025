@@ -3,6 +3,6 @@ const { predictEmotion, uploadImage } = require('../controllers/modelController'
 
 const router = express.Router();
 
-router.post('/predict', uploadImage, predictEmotion);
+router.post('/predict', predictEmotion);
 
 module.exports = router;

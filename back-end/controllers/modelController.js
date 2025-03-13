@@ -1,27 +1,25 @@
 const path = require('path');
 const { spawn } = require('child_process');
-const multer = require('multer');
-const fs = require('fs');
 const fetch = require('node-fetch'); // Assurez-vous d'installer node-fetch
 
-const upload = multer({ dest: 'uploads/' });
-
-exports.uploadImage = upload.single('image');
-
 exports.predictEmotion = (req, res) => {
-    const imagePath = req.file.path;
-    const { tweetId, userId } = req.body; // Récupérer tweetId et userId du corps de la requête
+    console.log('Starting main.py');
 
-    console.log(`Received image at path: ${imagePath}`);
+    const { userId } = req.body; // Récupérer userId du corps de la requête
+    console.log(`User ID reçu: ${userId}`);
 
-    const pythonProcess = spawn('python', [path.join(__dirname, '../../IA/main.py'), imagePath]);
+    const pythonProcess = spawn('python', [path.join(__dirname, '../../IA/model-scratch.py')]);
 
     let result = '';
     let error = '';
 
     pythonProcess.stdout.on('data', (data) => {
-        result += data.toString();
-        console.log(`Python stdout: ${data.toString()}`);
+        const dataStr = data.toString();
+        console.log(`Python stdout: ${dataStr}`);
+        // Filtrer les sorties de progression et ne conserver que le JSON final
+        if (dataStr.startsWith("RESULT:")) {
+            result += dataStr.replace("RESULT:", "").trim();
+        }
     });
 
     pythonProcess.stderr.on('data', (data) => {
@@ -30,24 +28,21 @@ exports.predictEmotion = (req, res) => {
     });
 
     pythonProcess.on('close', async (code) => {
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath); // Supprimer le fichier temporaire après traitement
-        }
-
         if (code !== 0) {
             console.error(`Python process exited with code ${code}`);
             return res.status(500).json({ error: error.trim() });
         }
 
         console.log(`Python process exited with code ${code}`);
-        const emotion = result.trim();
-
-        // appel l'API pour mettre à jour les émotions
         try {
+            const emotions = JSON.parse(result.trim());
+            console.log(`Emotions reçues: ${JSON.stringify(emotions)}`);
+
+            // appel l'API pour mettre à jour les émotions
             const response = await fetch('http://localhost:5000/api/emotions/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tweetId, userId, emotion })
+                body: JSON.stringify({ userId, emotions })
             });
 
             if (!response.ok) {
@@ -56,10 +51,10 @@ exports.predictEmotion = (req, res) => {
 
             const updateResult = await response.json();
             console.log('Emotions mises à jour:', updateResult);
-            res.json({ result: emotion });
-        } catch (updateError) {
-            console.error('Erreur lors de la mise à jour des émotions:', updateError);
-            res.status(500).json({ error: updateError.message });
+            res.json(emotions);
+        } catch (parseError) {
+            console.error('Erreur lors de l\'analyse du JSON:', parseError);
+            res.status(500).json({ error: 'Erreur lors de l\'analyse du JSON' });
         }
     });
 };
