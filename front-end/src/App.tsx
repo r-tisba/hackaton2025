@@ -15,6 +15,7 @@ import { ExtraSidebar } from './components/layout/ExtraSidebar';
 function AppLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname === "/login" || location.pathname === "/";
+  const isHome = location.pathname === "/home"
 
   return (
     <div className="app-container">
@@ -30,7 +31,7 @@ function AppLayout() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/tweet/:tweetId" element={<TweetDetails />} />
       </Routes>
-      {!isAuthPage && <ExtraSidebar />} {/* Masquer la ExtraSidebar à droite si sur login/register */}
+      {!isAuthPage && isHome && <ExtraSidebar />} {/* Masquer la ExtraSidebar à droite si sur login/register */}
     </div>
   );
 }
