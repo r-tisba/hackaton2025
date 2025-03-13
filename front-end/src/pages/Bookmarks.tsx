@@ -8,6 +8,8 @@ export function Bookmarks() {
   const [users, setUsers] = useState([]);
   const [likes, setLikes] = useState([]);
   const [retweets, setRetweets] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('token');
 
@@ -17,7 +19,20 @@ export function Bookmarks() {
         const response = await axios.get('http://localhost:5000/api/interactions/mysignets', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setBookmarkedTweets(response.data);
+        const bookmarkData = response.data;
+
+        // Récupérer les détails des tweets bookmarkés
+        const tweetIds = bookmarkData.map(bookmark => bookmark.id_tweet);
+        const tweetDetails = await Promise.all(
+          tweetIds.map(async (tweetId) => {
+            const tweetResponse = await axios.get(`http://localhost:5000/api/tweets/${tweetId}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            return tweetResponse.data;
+          })
+        );
+
+        setBookmarkedTweets(tweetDetails);
       } catch (error) {
         console.error('Erreur lors de la récupération des signets:', error);
       }
@@ -54,21 +69,83 @@ export function Bookmarks() {
       }
     };
 
-    fetchUsers();
-    fetchLikes();
-    fetchRetweets();
-
     if (user && token) {
+      fetchUsers();
       fetchBookmarks();
+      fetchLikes();
+      fetchRetweets();
     }
-  }, [user, token]);
+  }, [refreshTrigger]);
+
+  const handleLike = async (tweetId) => {
+    try {
+      const likedTweet = likes.find(like => like.id_tweet === tweetId);
+      if (likedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/like/${likedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(likes.filter(like => like.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/like/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes([...likes, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isLiked: !tweet.isLiked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du like:', error);
+    }
+  };
+
+  const handleRetweet = async (tweetId) => {
+    try {
+      const retweetedTweet = retweets.find(retweet => retweet.id_tweet === tweetId);
+      if (retweetedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/retweet/${retweetedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(retweets.filter(retweet => retweet.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/retweet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets([...retweets, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isRetweeted: !tweet.isRetweeted } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du retweet:', error);
+    }
+  };
+
+  const handleBookmark = async (tweetId) => {
+    try {
+      const bookmarkedTweet = bookmarks.find(bookmark => bookmark.id_tweet === tweetId);
+      if (bookmarkedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/signet/${bookmarkedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks(bookmarks.filter(bookmark => bookmark.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/signet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks([...bookmarks, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isBookmarked: !tweet.isBookmarked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du signet:', error);
+    }
+  };
 
   return (
     <div className="flex justify-center">
       {/* Contenu principal (scrollable) */}
       <div className="w-full max-w-2xl overflow-y-auto">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
-          <h1 className="text-xl font-bold">Bookmarks</h1>
+          <h1 className="text-xl font-bold">Signet</h1>
         </header>
 
         {bookmarkedTweets.length > 0 ? (
@@ -77,10 +154,16 @@ export function Bookmarks() {
               <TweetCard
                 key={tweet._id}
                 tweet={tweet}
-                onLike={() => {}}
-                onRetweet={() => {}}
+                className="tweet-card"
+                onLike={() => handleLike(tweet._id)}
+                onRetweet={() => handleRetweet(tweet._id)}
                 onReply={() => {}}
-                onBookmark={() => {}}
+                onBookmark={() => handleBookmark(tweet._id)}
+                data-tweet-id={tweet._id}  // Ajout de l'ID du tweet comme donnée d'ancrage
+                // ref={(el) => tweetRefs.current[index] = el} // Référence pour chaque élément
+                isLiked={likes.some(like => like.id_tweet === tweet._id)} // Vérifier si le tweet est liké
+                isRetweeted={retweets.some(retweet => retweet.id_tweet === tweet._id)} // Vérifier si le tweet est retweeté
+                isBookmarked={bookmarks.some(bookmark => bookmark.id_tweet === tweet._id)} // Vérifier si le tweet est bookmarké
               />
             ))}
           </div>

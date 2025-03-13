@@ -53,9 +53,6 @@ export function Profile() {
 
   const tabs = [
     { name: "Tweets", path: "tweets" },
-    { name: "Replies", path: "replies" },
-    { name: "Media", path: "media" },
-    { name: "Likes", path: "likes" }
   ];
 
   return (
@@ -143,16 +140,21 @@ export function Profile() {
         </div>
 
         {/* Afficher mes tweet dans le composer */}
-        {tweets.map((tweet) => (
-          <TweetCard
-            key={tweet._id}
-            tweet={tweet}
-            onLike={() => {}}
-            onRetweet={() => {}}
-            onReply={() => {}}
-            onBookmark={() => {}}
-          />
-        ))}
+        {tweets.length > 0 ? (
+          tweets.map((tweet) => (
+            <TweetCard
+              key={tweet._id}
+              tweet={tweet}
+              onLike={() => {}}
+              onRetweet={() => {}}
+              onReply={() => {}}
+              onBookmark={() => {}}
+            />
+          ))) :
+          (<>
+            <div className="text-center text-gray-500">Vous n'avez aucun tweet pour le moment.</div>
+          </>
+        )}
       </div>
     </>
   );

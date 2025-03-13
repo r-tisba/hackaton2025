@@ -9,8 +9,18 @@ export function Home() {
   const [likes, setLikes] = useState([]);
   const [retweets, setRetweets] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // État pour forcer un re-render
   
   const tweetRefs = useRef([]);
+
+  const fetchTweets = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/tweets");
+      setTweets(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des tweets:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchTweets = async () => {
@@ -69,7 +79,7 @@ export function Home() {
     fetchLikes();
     fetchRetweets();
     fetchBookmarks();
-  }, [tweets, users]);
+  }, [refreshTrigger]);
 
   const handleLike = async (tweetId) => {
     try {
@@ -86,6 +96,7 @@ export function Home() {
         setLikes([...likes, response.data]);
       }
       setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isLiked: !tweet.isLiked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Erreur lors du like:', error);
     }
@@ -106,6 +117,7 @@ export function Home() {
         setRetweets([...retweets, response.data]);
       }
       setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isRetweeted: !tweet.isRetweeted } : tweet));
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Erreur lors du retweet:', error);
     }
@@ -126,6 +138,7 @@ export function Home() {
         setBookmarks([...bookmarks, response.data]);
       }
       setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isBookmarked: !tweet.isBookmarked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Erreur lors du signet:', error);
     }
@@ -177,7 +190,7 @@ export function Home() {
           <h1 className="text-xl font-bold">Home</h1>
         </header>
 
-        <TweetComposer />
+        <TweetComposer onTweetAdded={fetchTweets}/>
 
         <div className="divide-y divide-gray-200">
           {tweets.map((tweet, index) => (

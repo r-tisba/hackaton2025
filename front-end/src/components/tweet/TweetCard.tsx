@@ -2,6 +2,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageCircle, Repeat2, Bookmark } from 'lucide-react';
 import type { Tweet } from '@/types';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface TweetCardProps {
   tweet: Tweet;
@@ -17,7 +18,7 @@ interface TweetCardProps {
 
 export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark, isLiked, isRetweeted, isBookmarked }: TweetCardProps) {
   return (
-    <article className="tweet-card border-b border-gray-200 p-4 hover:bg-gray-50">
+    <Link to={`/tweet/${tweet._id}`} className="tweet-card border-b border-gray-200 p-4 hover:bg-gray-50">
       <div className="flex space-x-3">
         <img
           src={tweet.id_user?.photo ?? "https://picsum.photos/199"}
@@ -100,6 +101,6 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark, isLik
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
