@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
 import { Link, Outlet, useLocation, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { TweetCard } from '../components/tweet/TweetCard';
 import axios from 'axios';
 
 export function Profile() {
@@ -10,6 +11,7 @@ export function Profile() {
   const { _id: id } = user;  // Extraire l'id de l'utilisateur
   console.log(user);
   
+  const [tweets, setTweets] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const location = useLocation();
 
@@ -28,8 +30,20 @@ export function Profile() {
       }
     };
 
+    const fetchTweets = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/tweets/mytweets", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        });
+        setTweets(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des tweets:", error);
+      }
+    };
+
     if (id) {
       fetchUserProfile();
+      fetchTweets();
     }
   }, [id]);
 
@@ -127,6 +141,18 @@ export function Profile() {
         <div className="divide-y divide-gray-200 p-4">
           <Outlet />
         </div>
+
+        {/* Afficher mes tweet dans le composer */}
+        {tweets.map((tweet) => (
+          <TweetCard
+            key={tweet._id}
+            tweet={tweet}
+            onLike={() => {}}
+            onRetweet={() => {}}
+            onReply={() => {}}
+            onBookmark={() => {}}
+          />
+        ))}
       </div>
     </>
   );

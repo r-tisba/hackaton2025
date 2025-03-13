@@ -31,6 +31,15 @@ exports.getTweetById = async (req, res) => {
     }
 };
 
+exports.getMyTweet = async (req, res) => {
+    try {
+        const tweets = await Tweet.find({ id_user: req.user.id }).populate('id_user', 'pseudo').sort({_id:-1});
+        res.json(tweets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 exports.deleteTweet = async (req, res) => {
     try {
         const tweet = await Tweet.findById(req.params.id);
