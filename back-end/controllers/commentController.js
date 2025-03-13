@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 exports.getCommentsByTweetId = async (req, res) => {
   try {
-    const comments = await Comment.find({ id_tweet: req.params.tweetId }).populate('user', 'pseudo');
+    const comments = await Comment.find({ id_tweet: req.params.tweetId }).populate('id_user', 'pseudo');
     res.json(comments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,7 +12,8 @@ exports.getCommentsByTweetId = async (req, res) => {
 };
 
 exports.addComment = async (req, res) => {
-  const { content, userId } = req.body;
+  const userId = req.user.id;
+  const { contenue } = req.body;
   const { tweetId } = req.params;
 
   try {
@@ -22,7 +23,7 @@ exports.addComment = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });
 
-    const newComment = new Comment({ content, id_tweet: tweetId, user: userId });
+    const newComment = new Comment({ contenue, id_tweet: tweetId, id_user: userId });
     await newComment.save();
 
     res.status(201).json(newComment);

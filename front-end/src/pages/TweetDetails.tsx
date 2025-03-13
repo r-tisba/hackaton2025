@@ -78,8 +78,8 @@ export function TweetDetails() {
     e.preventDefault();
     try {
       const response = await axios.post(`http://localhost:5000/api/comments/${tweetId}`, {
-        content: newComment,
-        userId: user._id,
+        contenue: newComment,
+        id_user: user._id,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -182,8 +182,8 @@ export function TweetDetails() {
           <div className="mt-4 divide-y divide-gray-200">
             {comments.map((comment) => (
               <div key={comment._id} className="py-4">
-                <p className="text-gray-900">{comment.content}</p>
-                <p className="text-gray-500 text-sm">@{comment.user.pseudo}</p>
+                <p className="text-gray-500 text-sm">@{comment.id_user.pseudo}</p>
+                <p className="text-gray-900">{comment.contenue}</p>
               </div>
             ))}
           </div>
