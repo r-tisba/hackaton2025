@@ -184,36 +184,13 @@ export function Home() {
   }, [tweets]);  // Réexécuter quand les tweets changent
 
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-2xl">
-        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
-          <h1 className="text-xl font-bold">Home</h1>
-        </header>
-
-        <TweetComposer onTweetAdded={fetchTweets}/>
-
-        <div className="divide-y divide-gray-200">
-          {tweets.map((tweet, index) => (
-            <TweetCard
-              key={tweet._id}
-              tweet={tweet}
-              className="tweet-card"
-              onLike={() => handleLike(tweet._id)}
-              onRetweet={() => handleRetweet(tweet._id)}
-              onReply={() => {}}
-              onBookmark={() => handleBookmark(tweet._id)}
-              data-tweet-id={tweet._id}  // Ajout de l'ID du tweet comme donnée d'ancrage
-              ref={(el) => tweetRefs.current[index] = el} // Référence pour chaque élément
-              isLiked={likes.some(like => like.id_tweet === tweet._id)} // Vérifier si le tweet est liké
-              isRetweeted={retweets.some(retweet => retweet.id_tweet === tweet._id)} // Vérifier si le tweet est retweeté
-              isBookmarked={bookmarks.some(bookmark => bookmark.id_tweet === tweet._id)} // Vérifier si le tweet est bookmarké
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="hidden lg:block fixed right-0 w-80 p-4 h-full overflow-y-auto">
-        {/* Sidebar */}
+    <div className="content">
+      <div className="feed">
+        {/* <h1 className="text-center mb-4">Home</h1> */}
+        <TweetComposer onTweetAdded={() => setTweets([...tweets])} />
+        {tweets.map((tweet) => (
+          <TweetCard key={tweet._id} tweet={tweet} />
+        ))}
       </div>
     </div>
   );

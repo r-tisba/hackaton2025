@@ -1,3 +1,294 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#root {
+    background-color: white;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+body {
+    background-color: #000; /* Mode sombre */
+    color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  
+  .app-container {
+    /* display: flex;
+    flex-direction: column; */
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  .sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: #232323;
+    padding: 20px;
+  }
+  
+  .content {
+    flex-grow: 1;
+    margin-left: 250px;
+    margin-right: 250px;
+    display: flex;
+    justify-content: center;
+    overflow-y: auto;
+    height: 100vh;
+  }
+  
+  .feed {
+    width: 70%;
+    max-width: 900px;
+    padding: 20px;
+    color: black;
+  }
+  
+  .right-sidebar {
+    width: 300px;
+    height: 100vh;
+    position: fixed;
+    right: 0;
+    top: 0;
+    background-color: #101010;
+    padding: 20px;
+    overflow-y: auto;
+    color: white;
+    border-left: 1px solid #333;
+  }
+
+  .twitterUsername {
+    color: rgb(29 155 240 / var(--tw-bg-opacity));
+  }
+  
+  .extra-sidebar {
+    width: 320px;
+    height: 100vh;
+    background-color: #232323;
+    position: fixed;
+    right: 0;
+    top: 0;
+    padding: 20px;
+    overflow-y: auto; /* Permet le scroll si le contenu est long */
+    border-left: 1px solid #333; /* Séparation visuelle */
+    color: white;
+  }
+  
+  .extra-sidebar h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .extra-sidebar .fake-ad {
+    background-color: rgb(49, 49, 49);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .extra-sidebar .fake-ad img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+/* --------------- LOGIN --------------- */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+  }
+  
+  .login-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+    width: 100%;
+  }
+  
+  .login-left {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .login-left h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #1a1a2e;
+  }
+  
+  .login-left p {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .login-right {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .login-form input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .login-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .login-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .signup-link {
+    margin-top: 10px;
+    text-align: center;
+    color: #007bff;
+    cursor: pointer;
+  }
+
+/* --------------- REGISTER --------------- */
+
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+  }
+  
+  .register-box {
+    color: #000;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+    width: 100%;
+  }
+  
+  .register-left {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .register-left h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #1a1a2e;
+  }
+  
+  .register-left p {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .register-right {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .register-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .register-form input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .register-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .register-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Style pour la sélection des centres d'intérêt */
+  .interest-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .interest-item {
+    position: relative;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #ccc;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .interest-item img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+  }
+  
+  .interest-item.selected {
+    border-color: #007bff;
+    transform: scale(1.05);
+  }
+  
+  .interest-label {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    text-align: center;
+    padding: 5px;
+  }
+  

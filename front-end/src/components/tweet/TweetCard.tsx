@@ -27,7 +27,7 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark, isLik
         />
         <div className="flex-1 space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="font-bold">{tweet.id_user?.pseudo}</span>
+            <span className="font-bold twitterUsername">{tweet.id_user?.pseudo}</span>
             <span className="text-gray-500">@{tweet.id_user?.pseudo}</span>
             <span className="text-gray-500">·</span>
             <time className="text-gray-500">
