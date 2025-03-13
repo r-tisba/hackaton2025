@@ -1,11 +1,11 @@
 const path = require('path');
 const { spawn } = require('child_process');
-const fetch = require('node-fetch'); // Assurez-vous d'installer node-fetch
+const fetch = require('node-fetch');
 
 exports.predictEmotion = (req, res) => {
     console.log('Starting main.py');
 
-    const { userId } = req.body; // Récupérer userId du corps de la requête
+    const { userId } = req.body;
     console.log(`User ID reçu: ${userId}`);
 
     const pythonProcess = spawn('python', [path.join(__dirname, '../../IA/model-scratch.py')]);
@@ -16,10 +16,8 @@ exports.predictEmotion = (req, res) => {
     pythonProcess.stdout.on('data', (data) => {
         const dataStr = data.toString();
         console.log(`Python stdout: ${dataStr}`);
-        // Filtrer les sorties de progression et ne conserver que le JSON final
-        if (dataStr.startsWith("RESULT:")) {
-            result += dataStr.replace("RESULT:", "").trim();
-        }
+        // On accumule toutes les données de sortie
+        result += dataStr;
     });
 
     pythonProcess.stderr.on('data', (data) => {
@@ -35,10 +33,18 @@ exports.predictEmotion = (req, res) => {
 
         console.log(`Python process exited with code ${code}`);
         try {
-            const emotions = JSON.parse(result.trim());
+            // Chercher la ligne qui contient le résultat JSON
+            const resultLine = result.split('\n').find(line => line.trim().startsWith('RESULT:'));
+            if (!resultLine) {
+                throw new Error('Aucun résultat JSON trouvé dans la sortie Python');
+            }
+
+            // Extraire et parser le JSON
+            const jsonStr = resultLine.replace('RESULT:', '').trim();
+            const emotions = JSON.parse(jsonStr);
             console.log(`Emotions reçues: ${JSON.stringify(emotions)}`);
 
-            // appel l'API pour mettre à jour les émotions
+            // Appel l'API pour mettre à jour les émotions
             const response = await fetch('http://localhost:5000/api/emotions/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -54,7 +60,10 @@ exports.predictEmotion = (req, res) => {
             res.json(emotions);
         } catch (parseError) {
             console.error('Erreur lors de l\'analyse du JSON:', parseError);
-            res.status(500).json({ error: 'Erreur lors de l\'analyse du JSON' });
+            res.status(500).json({ 
+                error: 'Erreur lors de l\'analyse du JSON',
+                details: parseError.message 
+            });
         }
     });
 };

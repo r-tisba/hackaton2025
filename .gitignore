@@ -2,3 +2,4 @@ devenv/
 back-end/.env
 node_modules/
 *.pkl
+IA/envirtuel/
