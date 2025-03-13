@@ -10,8 +10,12 @@ export function Home() {
   const [retweets, setRetweets] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // État pour forcer un re-render
-  
+  const [emotions, setEmotions] = useState(null); // État pour stocker les émotions
+
   const tweetRefs = useRef([]);
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
 
   const fetchTweets = async () => {
     try {
@@ -74,12 +78,26 @@ export function Home() {
       }
     };
 
+    const fetchEmotions = async () => {
+      try {
+        const response = await axios.post('http://localhost:5000/api/model/predict', {
+          userId: user._id
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEmotions(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des émotions:', error);
+      }
+    };
+
     fetchTweets();
     fetchUsers();
     fetchLikes();
     fetchRetweets();
     fetchBookmarks();
-  }, [refreshTrigger]);
+    fetchEmotions(); // Appel de l'API pour récupérer les émotions
+  }, [refreshTrigger, user._id, token]);
 
   const handleLike = async (tweetId) => {
     try {
@@ -190,7 +208,7 @@ export function Home() {
           <h1 className="text-xl font-bold">Home</h1>
         </header>
 
-        <TweetComposer onTweetAdded={fetchTweets}/>
+        <TweetComposer onTweetAdded={fetchTweets} />
 
         <div className="divide-y divide-gray-200">
           {tweets.map((tweet, index) => (
