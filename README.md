@@ -5,12 +5,12 @@ Ce projet est une application similaire à Twitter intégrant une analyse d'expr
 - **Front-end :** React.js
 - **Back-end :** Node.js/Express
 - **Base de données :** MongoDB Atlas
-- **Module IA :** Flask (ou Django) avec un modèle CNN pour la reconnaissance d'expressions faciales
+- **Module IA :** Pytyhon avec un module CNN pour la reconnaissance d'expressions faciales
 
 ## Structure du projet
 - **back-end/** : Code source du serveur Node.js/Express
 - **front-end/** : Code source de l'application React
-- **IA/** : API en Flask (ou Django) pour l'analyse des expressions faciales
+- **IA/** : API Express connectée a un script python pour l'analyse des expressions faciales
 
 ## Instructions d'installation
 ### 1. Lancer le Back-end
