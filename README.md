@@ -93,7 +93,6 @@ Ce module IA utilise un modèle de machine learning pré-entraîné pour détect
 - PIL (Pillow)
 - PyTorch
 - Transformers
-- Les fichiers `model.pkl` et `processor.pkl` dans le dossier du module
 
 ## Installation
 1. Navigue dans le dossier `IA`
