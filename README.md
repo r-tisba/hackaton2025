@@ -14,17 +14,29 @@ Ce projet est une application similaire à Twitter intégrant une analyse d'expr
 
 ## Instructions d'installation
 ### 1. Lancer le Back-end
+
+⚠️ **WARNING : Avant de lancer le backend, assure-toi de le faire dans l'environnement virtuel créé au préalable.**
+
 1. Navigue dans le dossier `back-end` :
    ```bash
    cd back-end
    ```
-2. Installe les dépendances :
+2. Initialise le projet et installe les dépendances :
    ```bash
-   npm install
+   npm init -y
+   npm install express mongoose dotenv cors bcrypt jsonwebtoken multer
    ```
 3. Lance le serveur :
    ```bash
-   node server.js
+   npm start
+   ```
+   **Note :** Le backend doit être lancé dans l'environnement Python créé au préalable.
+
+4. N'oubliez pas de créer un fichier `.env` à la racine du projet avec les informations suivantes :
+   ```env
+   MONGO_URI=mongodb+srv://boobacar5252:ddyug4yCMcO3T5N7@cluster0.kdc5xtk.mongodb.net/twitter_hackathon?retryWrites=true&w=majority
+   
+   SECRET_KEY=example
    ```
 
 ### 2. Lancer le Front-end
@@ -55,17 +67,10 @@ Ce projet est une application similaire à Twitter intégrant une analyse d'expr
      ```bash
      source venv/bin/activate
      ```
-3. Installe Flask :
-   ```bash
-   pip install flask
-   ```
-4. Lance l'API :
+3. Lance l'API :
    ```bash
    python app.py
    ```
-
-## Déploiement
-(Si tu utilises Docker, ajoute ici les instructions pour le docker-compose et le Dockerfile)
 
 ## Notes Importantes
 - Assure-toi d'avoir les outils nécessaires installés : Node.js, npm, Python, etc.
@@ -105,9 +110,7 @@ Ce module IA utilise un modèle de machine learning pré-entraîné pour détect
 ## Utilisation
 Pour analyser une expression faciale dans une image, utilisez la commande suivante :
 
-```bash
-python main.py path/to/image.jpg
-```
+Lancez le script dans le dossier IA detect.ipynb et souriez, vous êtes filmé.😁😁😁😁😁😁😒😒😒😒😒
 
 Le script retourne une des émotions suivantes :
 - anger (colère)
@@ -134,6 +137,7 @@ Ce module est conçu pour fonctionner comme un composant de l'application Twitte
 ## Remarques
 Les fichiers modèle et processeur doivent être présents dans le même dossier que le script principal pour que l'application fonctionne correctement.
 
+**Note :** Pas besoin d'installer Flask et Docker.
 
 ## Liens Trello
 
