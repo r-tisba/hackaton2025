@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { TweetComposer } from '../components/tweet/TweetComposer';
 import { TweetCard } from '../components/tweet/TweetCard';
 import axios from 'axios';
 
-
 export function Home() {
   const [tweets, setTweets] = useState([]);
   const [users, setUsers] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [retweets, setRetweets] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  
+  const tweetRefs = useRef([]);
 
   useEffect(() => {
     const fetchTweets = async () => {
@@ -27,13 +31,147 @@ export function Home() {
       }
     };
 
+    const fetchLikes = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/mylikes", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des likes:", error);
+      }
+    };
+
+    const fetchRetweets = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/myretweets", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des retweets:", error);
+      }
+    };
+
+    const fetchBookmarks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/mysignets", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des signets:", error);
+      }
+    };
+
     fetchTweets();
     fetchUsers();
-  }, []);
+    fetchLikes();
+    fetchRetweets();
+    fetchBookmarks();
+  }, [tweets, users]);
+
+  const handleLike = async (tweetId) => {
+    try {
+      const likedTweet = likes.find(like => like.id_tweet === tweetId);
+      if (likedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/like/${likedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(likes.filter(like => like.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/like/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes([...likes, response.data]);
+      }
+      setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isLiked: !tweet.isLiked } : tweet));
+    } catch (error) {
+      console.error('Erreur lors du like:', error);
+    }
+  };
+
+  const handleRetweet = async (tweetId) => {
+    try {
+      const retweetedTweet = retweets.find(retweet => retweet.id_tweet === tweetId);
+      if (retweetedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/retweet/${retweetedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(retweets.filter(retweet => retweet.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/retweet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets([...retweets, response.data]);
+      }
+      setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isRetweeted: !tweet.isRetweeted } : tweet));
+    } catch (error) {
+      console.error('Erreur lors du retweet:', error);
+    }
+  };
+
+  const handleBookmark = async (tweetId) => {
+    try {
+      const bookmarkedTweet = bookmarks.find(bookmark => bookmark.id_tweet === tweetId);
+      if (bookmarkedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/signet/${bookmarkedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks(bookmarks.filter(bookmark => bookmark.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/signet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks([...bookmarks, response.data]);
+      }
+      setTweets(tweets.map(tweet => tweet._id === tweetId ? { ...tweet, isBookmarked: !tweet.isBookmarked } : tweet));
+    } catch (error) {
+      console.error('Erreur lors du signet:', error);
+    }
+  };
+
+  // Fonction pour gérer la détection d'élément visible et centré
+  const handleIntersection = (entries, observer) => {
+    entries.forEach(entry => {
+      const rect = entry.target.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      // Calculer si l'élément est dans la plage centrale (par exemple entre 40% et 60% du viewport)
+      const isCentered = rect.top >= windowHeight * 0.4 && rect.bottom <= windowHeight * 0.6;
+
+      if (entry.isIntersecting && isCentered) {
+        // Quand l'article est centré et dans la fenêtre
+        console.log('Article:', entry.target.dataset.tweetId);  // Affiche l'ID du tweet
+      }
+    });
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleIntersection, {
+      root: null, // Utiliser la fenêtre du navigateur comme racine
+      threshold: 0, // On veut détecter dès que l'élément touche le viewport
+    });
+
+    // Observer chaque élément de la liste des tweets
+    tweetRefs.current.forEach(ref => {
+      if (ref) {
+        observer.observe(ref);
+      }
+    });
+
+    // Clean up l'observer lors du démontage du composant
+    return () => {
+      tweetRefs.current.forEach(ref => {
+        if (ref) {
+          observer.unobserve(ref);
+        }
+      });
+    };
+  }, [tweets]);  // Réexécuter quand les tweets changent
 
   return (
     <div className="flex justify-center">
-      {/* Contenu principal */}
       <div className="w-full max-w-2xl">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
           <h1 className="text-xl font-bold">Home</h1>
@@ -42,66 +180,27 @@ export function Home() {
         <TweetComposer />
 
         <div className="divide-y divide-gray-200">
-          {tweets.map((tweet) => (
+          {tweets.map((tweet, index) => (
             <TweetCard
               key={tweet._id}
               tweet={tweet}
-              onLike={() => {}}
-              onRetweet={() => {}}
+              className="tweet-card"
+              onLike={() => handleLike(tweet._id)}
+              onRetweet={() => handleRetweet(tweet._id)}
               onReply={() => {}}
-              onBookmark={() => {}}
+              onBookmark={() => handleBookmark(tweet._id)}
+              data-tweet-id={tweet._id}  // Ajout de l'ID du tweet comme donnée d'ancrage
+              ref={(el) => tweetRefs.current[index] = el} // Référence pour chaque élément
+              isLiked={likes.some(like => like.id_tweet === tweet._id)} // Vérifier si le tweet est liké
+              isRetweeted={retweets.some(retweet => retweet.id_tweet === tweet._id)} // Vérifier si le tweet est retweeté
+              isBookmarked={bookmarks.some(bookmark => bookmark.id_tweet === tweet._id)} // Vérifier si le tweet est bookmarké
             />
           ))}
         </div>
       </div>
 
-      {/* Sidebar (Tendances + Suggestions) */}
       <div className="hidden lg:block fixed right-0 w-80 p-4 h-full overflow-y-auto">
-        <div className="rounded-full bg-gray-100 p-3 mb-4">
-          <div className="flex items-center space-x-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search h-5 w-5 text-gray-500">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
-            <input type="text" placeholder="Search Twitter" className="bg-transparent focus:outline-none w-full" />
-          </div>
-        </div>
-
-        {/* Trends */}
-        <div className="rounded-xl bg-gray-50 p-4 mb-4">
-          <h2 className="text-xl font-bold">Tendances pour vous</h2>
-          <div className="mt-4 space-y-4">
-            {["Technology", "Programming", "React", "JavaScript", "WebDev"].map((trend, index) => (
-              <div key={index} className="flex justify-between">
-                <div>
-                  <span className="font-medium">#{trend}</span>
-                  <p className="text-sm text-gray-500">{Math.floor(Math.random() * 100) + "K Tweets"}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Who to follow */}
-        <div className="rounded-xl bg-gray-50 p-4">
-          <h2 className="text-xl font-bold">Qui suivre</h2>
-          <div className="mt-4 space-y-4">
-            {users.map((user, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <img src={user.photo} alt={user.pseudo} className="h-10 w-10 rounded-full" />
-                  <div>
-                    <p className="font-medium">{user.pseudo}</p>
-                    <p className="text-sm text-gray-500">@{user.pseudo}</p>
-                  </div>
-                </div>
-                <button className="inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-gray-300 bg-transparent hover:bg-gray-50 px-4 py-2 text-sm">
-                  Suivre
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Sidebar */}
       </div>
     </div>
   );

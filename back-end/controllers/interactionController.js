@@ -113,7 +113,7 @@ exports.signetTweet = async (req, res) => {
 
 exports.deleteSignet = async (req, res) => {
     try {
-        const signet = await Signet.findOne({ id_user: req.user.id, id_tweet: req.params.tweetId });
+        const signet = await Signet.findOne({ id: req.params.id });
         if (!signet) return res.status(404).json({ message: 'Signet introuvable' });
         await signet.deleteOne();
         res.json({ message: 'Signet supprimé' });

@@ -15,7 +15,7 @@ export function Register() {
   const interestData: Record<string, { emotion: string; image: string }> = {
     "Humour": { emotion: "happy", image: "https://picsum.photos/150?random=1" },
     "Frustation": { emotion: "angry", image: "https://picsum.photos/150?random=2" },
-    "Trise": { emotion: "sad", image: "https://picsum.photos/150?random=3" },
+    "Triste": { emotion: "sad", image: "https://picsum.photos/150?random=3" },
     "Surprise": { emotion: "surprise", image: "https://picsum.photos/150?random=4" },
     "Horreur": { emotion: "fear", image: "https://picsum.photos/150?random=5" },
     "Dégoût": { emotion: "disgust", image: "https://picsum.photos/150?random=7" },

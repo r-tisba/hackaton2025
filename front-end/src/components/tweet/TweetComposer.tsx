@@ -60,7 +60,7 @@ export function TweetComposer() {
       <div className="flex space-x-4">
         {user && (
           <img
-            src={user.profileImage}
+            src={user.photo ?? 'https://picsum.photos/200?random=1'}
             alt={user.name}
             className="h-12 w-12 rounded-full"
           />
