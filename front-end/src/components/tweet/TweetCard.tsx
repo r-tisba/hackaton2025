@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, MessageCircle, Repeat2, Share, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Bookmark } from 'lucide-react';
 import type { Tweet } from '@/types';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface TweetCardProps {
   tweet: Tweet;
@@ -8,16 +10,18 @@ interface TweetCardProps {
   onRetweet: (id: Number) => void;
   onReply: (id: Number) => void;
   onBookmark: (id: Number) => void;
-  id_user: Number;
+  className?: string;
+  isLiked: boolean;
+  isRetweeted: boolean;
+  isBookmarked: boolean;
 }
 
-export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: TweetCardProps) {
-  console.log(tweet);
+export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark, isLiked, isRetweeted, isBookmarked }: TweetCardProps) {
   return (
-    <article className="border-b border-gray-200 p-4 hover:bg-gray-50">
+    <Link to={`/tweet/${tweet._id}`} className="tweet-card border-b border-gray-200 p-4 hover:bg-gray-50">
       <div className="flex space-x-3">
         <img
-          src={tweet.id_user?.pseudo ?? "https://picsum.photos/199"}
+          src={tweet.id_user?.photo ?? "https://picsum.photos/199"}
           alt={tweet.id_user?.pseudo ?? ""}
           className="h-12 w-12 rounded-full"
         />
@@ -68,7 +72,7 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: Twe
             <button
               onClick={() => onRetweet(tweet.id)}
               className={`flex items-center space-x-2 ${
-                tweet.isRetweeted ? 'text-green-500' : 'hover:text-green-500'
+                isRetweeted ? 'text-green-500' : 'hover:text-green-500'
               }`}
             >
               <Repeat2 className="h-5 w-5" />
@@ -78,7 +82,7 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: Twe
             <button
               onClick={() => onLike(tweet.id)}
               className={`flex items-center space-x-2 ${
-                tweet.isLiked ? 'text-red-500' : 'hover:text-red-500'
+                isLiked ? 'text-red-500' : 'hover:text-red-500'
               }`}
             >
               <Heart className="h-5 w-5" />
@@ -88,18 +92,15 @@ export function TweetCard({ tweet, onLike, onRetweet, onReply, onBookmark }: Twe
             <button
               onClick={() => onBookmark(tweet.id)}
               className={`flex items-center space-x-2 ${
-                tweet.isBookmarked ? 'text-blue-500' : 'hover:text-blue-500'
+                isBookmarked ? 'text-blue-500' : 'hover:text-blue-500'
               }`}
             >
               <Bookmark className="h-5 w-5" />
             </button>
             
-            <button className="flex items-center space-x-2 hover:text-blue-500">
-              <Share className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

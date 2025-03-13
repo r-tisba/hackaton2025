@@ -14,7 +14,7 @@ exports.createTweet = async (req, res) => {
 
 exports.getAllTweets = async (req, res) => {
     try {
-        const tweets = await Tweet.find().populate('id_user', 'pseudo');
+        const tweets = await Tweet.find().populate('id_user', 'pseudo').sort({_id:-1});
         res.json(tweets);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -30,6 +30,15 @@ exports.getTweetById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.getMyTweet = async (req, res) => {
+    try {
+        const tweets = await Tweet.find({ id_user: req.user.id }).populate('id_user', 'pseudo').sort({_id:-1});
+        res.json(tweets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 exports.deleteTweet = async (req, res) => {
     try {

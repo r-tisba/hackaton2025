@@ -4,12 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 
 const navigation = [
-  { name: 'Home', href: '/home', icon: Home },
+  { name: 'Accueil', href: '/home', icon: Home },
   { name: 'Explore', href: '/explore', icon: Search },
   { name: 'Notifications', href: '/notifications', icon: Bell },
-  { name: 'Messages', href: '/messages', icon: MessageCircle },
-  { name: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Signet', href: '/bookmarks', icon: Bookmark },
+  { name: 'Profil', href: '/profile', icon: User },
 ];
 
 export function Sidebar() {

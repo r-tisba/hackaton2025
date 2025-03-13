@@ -9,6 +9,7 @@ import { Bookmarks } from './pages/Bookmarks';
 import { Profile } from './pages/Profile';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { TweetDetails } from './pages/TweetDetails';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/messages" element={<Messages />} />
             <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/tweet/:tweetId" element={<TweetDetails />} />
           </Routes>
         </main>
         

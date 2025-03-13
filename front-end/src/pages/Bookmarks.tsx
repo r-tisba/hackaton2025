@@ -1,28 +1,169 @@
+import { useEffect, useState } from 'react';
 import { TweetCard } from '../components/tweet/TweetCard';
-import { mockTweets } from '../data/mockData';
+import axios from 'axios';
 import { Search } from 'lucide-react';
 
 export function Bookmarks() {
-  const bookmarkedTweets = mockTweets.filter((tweet) => tweet.isBookmarked);
+  const [bookmarkedTweets, setBookmarkedTweets] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [retweets, setRetweets] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/interactions/mysignets', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const bookmarkData = response.data;
+
+        // Récupérer les détails des tweets bookmarkés
+        const tweetIds = bookmarkData.map(bookmark => bookmark.id_tweet);
+        const tweetDetails = await Promise.all(
+          tweetIds.map(async (tweetId) => {
+            const tweetResponse = await axios.get(`http://localhost:5000/api/tweets/${tweetId}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            return tweetResponse.data;
+          })
+        );
+
+        setBookmarkedTweets(tweetDetails);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des signets:', error);
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/users");
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs:", error);
+      }
+    };
+
+    const fetchLikes = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/mylikes", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des likes:", error);
+      }
+    };
+
+    const fetchRetweets = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/interactions/myretweets", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des retweets:", error);
+      }
+    };
+
+    if (user && token) {
+      fetchUsers();
+      fetchBookmarks();
+      fetchLikes();
+      fetchRetweets();
+    }
+  }, [refreshTrigger]);
+
+  const handleLike = async (tweetId) => {
+    try {
+      const likedTweet = likes.find(like => like.id_tweet === tweetId);
+      if (likedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/like/${likedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes(likes.filter(like => like.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/like/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setLikes([...likes, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isLiked: !tweet.isLiked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du like:', error);
+    }
+  };
+
+  const handleRetweet = async (tweetId) => {
+    try {
+      const retweetedTweet = retweets.find(retweet => retweet.id_tweet === tweetId);
+      if (retweetedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/retweet/${retweetedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets(retweets.filter(retweet => retweet.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/retweet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setRetweets([...retweets, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isRetweeted: !tweet.isRetweeted } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du retweet:', error);
+    }
+  };
+
+  const handleBookmark = async (tweetId) => {
+    try {
+      const bookmarkedTweet = bookmarks.find(bookmark => bookmark.id_tweet === tweetId);
+      if (bookmarkedTweet) {
+        await axios.delete(`http://localhost:5000/api/interactions/signet/${bookmarkedTweet._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks(bookmarks.filter(bookmark => bookmark.id_tweet !== tweetId));
+      } else {
+        const response = await axios.post(`http://localhost:5000/api/interactions/signet/${tweetId}`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setBookmarks([...bookmarks, response.data]);
+      }
+      setBookmarkedTweets(bookmarkedTweets.map(tweet => tweet._id === tweetId ? { ...tweet, isBookmarked: !tweet.isBookmarked } : tweet));
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Erreur lors du signet:', error);
+    }
+  };
 
   return (
     <div className="flex justify-center">
       {/* Contenu principal (scrollable) */}
       <div className="w-full max-w-2xl overflow-y-auto">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
-          <h1 className="text-xl font-bold">Bookmarks</h1>
+          <h1 className="text-xl font-bold">Signet</h1>
         </header>
 
         {bookmarkedTweets.length > 0 ? (
           <div className="divide-y divide-gray-200">
             {bookmarkedTweets.map((tweet) => (
               <TweetCard
-                key={tweet.id}
+                key={tweet._id}
                 tweet={tweet}
-                onLike={() => {}}
-                onRetweet={() => {}}
+                className="tweet-card"
+                onLike={() => handleLike(tweet._id)}
+                onRetweet={() => handleRetweet(tweet._id)}
                 onReply={() => {}}
-                onBookmark={() => {}}
+                onBookmark={() => handleBookmark(tweet._id)}
+                data-tweet-id={tweet._id}  // Ajout de l'ID du tweet comme donnée d'ancrage
+                // ref={(el) => tweetRefs.current[index] = el} // Référence pour chaque élément
+                isLiked={likes.some(like => like.id_tweet === tweet._id)} // Vérifier si le tweet est liké
+                isRetweeted={retweets.some(retweet => retweet.id_tweet === tweet._id)} // Vérifier si le tweet est retweeté
+                isBookmarked={bookmarks.some(bookmark => bookmark.id_tweet === tweet._id)} // Vérifier si le tweet est bookmarké
               />
             ))}
           </div>
@@ -66,16 +207,13 @@ export function Bookmarks() {
           <div className="rounded-xl bg-gray-50 p-4">
             <h2 className="text-xl font-bold">Qui suivre</h2>
             <div className="mt-4 space-y-4">
-              {[
-                { name: "Jane Cooper", username: "@jane_cooper", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" },
-                { name: "Cody Fisher", username: "@cody_fisher", img: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" }
-              ].map((user, index) => (
+              {users.map((user, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <img src={user.img} alt={user.name} className="h-10 w-10 rounded-full" />
+                    <img src={user.photo} alt={user.pseudo} className="h-10 w-10 rounded-full" />
                     <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-500">{user.username}</p>
+                      <p className="font-medium">{user.pseudo}</p>
+                      <p className="text-sm text-gray-500">@{user.pseudo}</p>
                     </div>
                   </div>
                   <button className="inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-gray-300 bg-transparent hover:bg-gray-50 px-4 py-2 text-sm">

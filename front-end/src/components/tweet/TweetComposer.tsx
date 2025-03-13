@@ -3,20 +3,20 @@ import { Image, Smile } from 'lucide-react';
 import { Button } from '../ui/Button';
 import axios from 'axios';
 
-export function TweetComposer() {
+export function TweetComposer({ onTweetAdded }: { onTweetAdded: () => void }) {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(localStorage.getItem('user'));
       const { _id: id } = user;  // Extraire l'id de l'utilisateur
 
       try {
         const response = await axios.get(`http://localhost:5000/api/users/profile/${id}`, {
           headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         });
@@ -31,13 +31,13 @@ export function TweetComposer() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const tweetData = {
         contenue: content,
         attachment: null,  // Assurez-vous que 'images' contient les URL des images ou leur représentation
       };
-  
+
       // Envoi de la requête POST pour créer un tweet
       await axios.post('http://localhost:5000/api/tweets/create', tweetData, {
         headers: {
@@ -46,12 +46,12 @@ export function TweetComposer() {
         },
       });
 
-  
       // Réinitialisation après envoi
       setContent('');
       setImages([]);
+      onTweetAdded();  // Notifier le parent pour rafraîchir les tweets
     } catch (error) {
-      console.error('Error creating tweet:', error);
+      console.error('Erreur lors de la création du tweet:', error);
     }
   };
 
@@ -60,7 +60,7 @@ export function TweetComposer() {
       <div className="flex space-x-4">
         {user && (
           <img
-            src={user.profileImage}
+            src={user.photo ?? 'https://picsum.photos/200?random=1'}
             alt={user.name}
             className="h-12 w-12 rounded-full"
           />
