@@ -1,20 +1,30 @@
-# Node.js (back-end et front-end)
+devenv/
+back-end/.env
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-build/
-
-# React (build folder)
-/build
-
-# Python (IA)
-venv/
-__pycache__/
-*.pyc
-
-# Environnement général
-.DS_Store
-
-# DataSet
+*.pkl
+IA/envirtuel/
+env_anas/
+.env/
+env/
 archive/
+archive2/
+archive3_preprocessed/
+archive2 2/
+archive2_preprocessed/
+archive2_preprocessed/
+train/
+train2/
+disgust/
+archive4_preprocessed/
+
+Archi/
+
+Archi/
+
+# RAPH - IA
+data/
+data2/
+merged/
+validation/
+models/autres
+Word/
