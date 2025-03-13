@@ -65,84 +65,70 @@ export function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Créer un compte</h2>
+    <div className="register-container">
+      <div className="register-box">
+        
+        {/* Partie gauche avec une intro et une image */}
+        <div className="register-left">
+          <h1>Rejoignez Face-and-Tweet 🐦</h1>
+          <p>Inscrivez-vous et personnalisez votre contenu selon vos préférences !</p>
+          <img 
+            className="mt-3"
+            src="https://media.istockphoto.com/id/981630990/fr/vectoriel/vintage-big-brother-vous-regarde-yeux-surveillance-et-protection-des-renseignements.jpg?s=612x612&w=0&k=20&c=qTjruA_wuh6HhMOTFkgi9a0a3BtPIHY4S3JSMhYktz8=" 
+            alt="Twitter Clone" 
+            width="550px"
+          />
+        </div>
 
-        <form onSubmit={handleSignup}>
-
-          {/* Champ Nom d'utilisateur */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Nom d'utilisateur</label>
+        {/* Partie droite : Formulaire d'inscription */}
+        <div className="register-right">
+          <form className="register-form" onSubmit={handleSignup}>
+            <h2 className="mb-2">Créer un compte</h2>
+            
             <input
               type="text"
-              className="w-full p-2 border rounded"
+              placeholder="Nom d'utilisateur"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
-          </div>
-
-          {/* Champ Adresse e-mail */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Adresse e-mail</label>
             <input
               type="email"
-              className="w-full p-2 border rounded"
+              placeholder="Adresse e-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </div>
-          
-          {/* Champ Mot de passe */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Mot de passe</label>
             <input
               type="password"
-              className="w-full p-2 border rounded"
+              placeholder="Mot de passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
 
-          {/* Sélection des centres d'intérêt */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Quels contenus souhaitez-vous voir ?</label>
-            <div className="grid grid-cols-2 gap-4">
+            {/* Sélection des centres d'intérêt */}
+            <p>Choisissez vos centres d'intérêt :</p>
+            <div className="interest-grid">
               {availableInterests.map((interest) => (
                 <div 
                   key={interest} 
-                  className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                    interests.includes(interest) ? "border-blue-500 scale-105" : "border-gray-300"
-                  }`}
+                  className={`interest-item ${interests.includes(interest) ? "selected" : ""}`}
                   onClick={() => toggleInterest(interest)}
                 >
-                  <img 
-                    src={interestData[interest].image} 
-                    alt={interest} 
-                    className="w-full h-24 object-cover"
-                  />
-                  <div className="absolute bottom-0 bg-black bg-opacity-50 text-white text-center w-full p-1">
-                    {interest}
-                  </div>
+                  <img src={interestData[interest].image} alt={interest} />
+                  <div className="interest-label">{interest}</div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Message d'erreur en bas */}
-          {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+            {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
 
-          {/* Bouton de soumission */}
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded mt-4">
-            S'inscrire
-          </button>
+            <button type="submit">S'inscrire</button>
+            <Link to="/login" className="signup-link">Déjà inscrit ? Connectez-vous</Link>
+          </form>
+        </div>
 
-          <Link to="/login" className="block text-center mt-4 text-blue-500">Déjà inscrit ? Connectez-vous</Link>
-
-        </form>
       </div>
     </div>
   );

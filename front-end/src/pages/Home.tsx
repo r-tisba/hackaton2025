@@ -202,8 +202,8 @@ export function Home() {
   }, [tweets]);  // Réexécuter quand les tweets changent
 
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-2xl">
+    <div className="flex justify-center content">
+      <div className="w-full max-w-2xl feed">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 p-4 backdrop-blur">
           <h1 className="text-xl font-bold">Home</h1>
         </header>
